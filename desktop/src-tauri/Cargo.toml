@@ -1,0 +1,13 @@
+[package]
+name = "uart-remote-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+serde.workspace = true
+tauri = { version = "2.0", features = [] }
+uart-remote-core = { path = "../../core" }
