@@ -3969,10 +3969,17 @@ dependencies = [
 name = "uart-remote-desktop"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
+ "futures-util",
  "serde",
+ "serde_json",
+ "serialport",
  "tauri",
  "tauri-build",
+ "tokio",
+ "tokio-tungstenite",
  "uart-remote-core",
+ "uuid",
 ]
 
 [[package]]

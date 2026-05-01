@@ -2,7 +2,7 @@
 
 ## 中文
 
-UartRemote 是一个 Rust 优先的远程串口系统。当前阶段提供可复用核心库、WebSocket 串口服务端、CLI 远程终端客户端，以及一个 TypeScript + Tauri 桌面端框架。桌面 UI 目前只做基础框架和命令打通，后续可以继续接入完整串口会话、日志流和配置管理。
+UartRemote 是一个 Rust 优先的远程串口系统。当前阶段提供可复用核心库、WebSocket 串口服务端、CLI 远程终端客户端，以及一个 TypeScript + Tauri 桌面端。桌面端是单一 APP，不拆成服务端版和客户端版：它既可以启动本机共享服务，也可以连接远端串口服务。
 
 ### 仓库架构
 
@@ -11,7 +11,7 @@ UartRemote 是一个 Rust 优先的远程串口系统。当前阶段提供可复
 - `core`：共享核心库。包含协议帧、Token 认证、串口枚举/打开能力、串口配置结构、写权限状态机。CLI、server、Tauri 后端都应优先复用这里的能力。
 - `server`：WebSocket 串口服务端。负责监听连接、校验 Token、打开本机串口、广播串口读取数据、管理单 client 独占写权限。
 - `client`：CLI 远程串口客户端。负责连接 server、认证、打开远程串口、申请写权限、将终端输入写入远端串口，并把串口输出打印到终端。
-- `desktop`：Tauri 桌面端。前端使用 TypeScript + Vite；后端位于 `desktop/src-tauri`，作为 workspace 成员复用 `core`。当前已打通应用状态、串口枚举、默认串口配置、Token 校验命令。
+- `desktop`：Tauri 桌面端。前端使用 TypeScript + Vite；后端位于 `desktop/src-tauri`，作为 workspace 成员复用 `core`。当前已打通应用状态、串口枚举、启动/停止本机共享服务、连接/断开远端串口、申请/释放写权限、发送文本和接收串口事件。
 
 ### 运行 CLI Server
 
@@ -42,6 +42,12 @@ cd desktop
 npm install
 npm run tauri:dev
 ```
+
+桌面端包含两个基础工作区：
+
+- 共享本机串口：输入监听地址和 Token，启动内嵌 WebSocket server，让其他客户端连接本机串口。
+- 连接远端串口：输入远端 WebSocket 地址、Token、串口名和波特率，连接远端 server 后收发串口数据。
+- 自定义串口命令：在发送区保存常用文本命令，之后可以一键发送；运行日志和串口输出分开展示。
 
 只验证前端构建：
 
@@ -87,7 +93,7 @@ npm run build
 
 ## English
 
-UartRemote is a Rust-first remote serial-port system. The current milestone provides a reusable core library, a WebSocket serial server, a CLI terminal client, and a TypeScript + Tauri desktop shell. The desktop UI is intentionally minimal for now; it proves that frontend-to-backend commands are wired and leaves room for full serial sessions, log streaming, and configuration management.
+UartRemote is a Rust-first remote serial-port system. The current milestone provides a reusable core library, a WebSocket serial server, a CLI terminal client, and a TypeScript + Tauri desktop app. The desktop app is a single product rather than separate server/client apps: it can start a local sharing server and it can also connect to a remote serial server.
 
 ### Repository Architecture
 
@@ -96,7 +102,7 @@ This repository is a Rust workspace with these main modules:
 - `core`: Shared library. It contains protocol frames, token authentication, serial port enumeration/open helpers, serial configuration types, and the writer-permission state machine. CLI tools, the server, and the Tauri backend should reuse this crate first.
 - `server`: WebSocket serial server. It accepts client connections, validates tokens, opens local serial ports, broadcasts serial read data, and enforces single-client exclusive write permission.
 - `client`: CLI remote serial client. It connects to the server, authenticates, opens a remote serial port, claims write permission, forwards terminal input to the remote serial port, and prints serial output to the terminal.
-- `desktop`: Tauri desktop shell. The frontend uses TypeScript + Vite. The backend lives in `desktop/src-tauri`, is a workspace member, and reuses `core`. It currently wires app status, serial port listing, default serial configuration, and token verification.
+- `desktop`: Tauri desktop app. The frontend uses TypeScript + Vite. The backend lives in `desktop/src-tauri`, is a workspace member, and reuses `core`. It currently wires app status, serial port listing, local sharing server start/stop, remote serial connect/disconnect, writer claim/release, text sending, and serial receive events.
 
 ### Run The CLI Server
 
@@ -127,6 +133,12 @@ cd desktop
 npm install
 npm run tauri:dev
 ```
+
+The desktop app has two basic work areas:
+
+- Share local serial ports: enter a bind address and token, then start the embedded WebSocket server so other clients can connect to local serial ports.
+- Connect to a remote serial port: enter the remote WebSocket URL, token, serial port name, and baud rate, then connect and exchange serial data.
+- Custom serial commands: save frequently used text commands in the send panel and send them with one click. Runtime logs and serial output are displayed separately.
 
 Frontend-only build check:
 
